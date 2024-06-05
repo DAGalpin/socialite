@@ -41,6 +41,8 @@ fun Bubble(chatId: Long) {
                     // TODO (mayurikhin): Hook up camera button in the Bubble composable
                     onPhotoPickerClick = {},
                     modifier = Modifier.fillMaxSize(),
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this@AnimatedContent,
                     // sharedTransitionScope = this@SharedTransitionLayout,
                     // animatedContentScope = this@AnimatedContent
                 )

@@ -24,8 +24,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -124,7 +122,9 @@ fun ChatScreen(
     onPhotoPickerClick: () -> Unit,
     onVideoClick: (uri: String) -> Unit,
     prefilledText: String? = null,
-    viewModel: ChatViewModel = hiltViewModel()
+    viewModel: ChatViewModel = hiltViewModel(),
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
 ) {
     LaunchedEffect(chatId) {
         viewModel.setChatId(chatId)
@@ -149,7 +149,8 @@ fun ChatScreen(
             onPhotoPickerClick = onPhotoPickerClick,
             onVideoClick = onVideoClick,
             modifier = modifier
-                .clip(RoundedCornerShape(5))
+                .clip(RoundedCornerShape(5)),
+            sharedTransitionScope = sharedTransitionScope, animatedContentScope = animatedContentScope
         )
     }
     LifecycleEffect(
@@ -194,7 +195,9 @@ private fun ChatContent(
     onCameraClick: () -> Unit,
     onPhotoPickerClick: () -> Unit,
     onVideoClick: (uri: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
@@ -206,6 +209,8 @@ private fun ChatContent(
                 chat = chat,
                 scrollBehavior = scrollBehavior,
                 onBackPressed = onBackPressed,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
             )
         },
     ) { innerPadding ->
@@ -255,42 +260,49 @@ private fun ChatAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onBackPressed: (() -> Unit)?,
     modifier: Modifier = Modifier,
-
-) {
-    TopAppBar(
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                // This only supports DM for now.
-                val contact = chat.attendees.first()
-                Image(
-                    painter = rememberIconPainter(contact.iconUri),
-                    contentDescription = null,
-                    modifier = Modifier.Companion
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(Color.LightGray),
-                )
-                Text(
-                    text = contact.name,
-                )
-            }
-        },
-        modifier = modifier,
-        scrollBehavior = scrollBehavior,
-        navigationIcon = {
-            if (onBackPressed != null) {
-                IconButton(onClick = onBackPressed) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    ) {
+    with(sharedTransitionScope) {
+        TopAppBar(
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    // This only supports DM for now.
+                    val contact = chat.attendees.first()
+                    Image(
+                        painter = rememberIconPainter(contact.iconUri),
+                        contentDescription = null,
+                        modifier = Modifier.Companion
+                            .sharedElement(
+                                sharedTransitionScope.rememberSharedContentState(key = chat.chatWithLastMessage.id),
+                                animatedVisibilityScope = animatedContentScope,
+                                )
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color.LightGray),
+                    )
+                    Text(
+                        text = contact.name,
                     )
                 }
-            }
-        },
-    )
+            },
+            modifier = modifier,
+            scrollBehavior = scrollBehavior,
+            navigationIcon = {
+                if (onBackPressed != null) {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                        )
+                    }
+                }
+            },
+        )
+    }
 }
 
 @Composable
@@ -539,7 +551,9 @@ private fun PreviewChatContent() {
                     onSendClick = {},
                     onCameraClick = {},
                     onPhotoPickerClick = {},
-                    onVideoClick = {}
+                    onVideoClick = {},
+                    sharedTransitionScope = this@SharedTransitionScope,
+                    animatedContentScope = this@AnimatedContent
                 )
             }
         }
