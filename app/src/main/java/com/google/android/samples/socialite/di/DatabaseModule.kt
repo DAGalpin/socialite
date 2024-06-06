@@ -23,6 +23,7 @@ import com.google.android.samples.socialite.data.AppDatabase
 import com.google.android.samples.socialite.data.ChatDao
 import com.google.android.samples.socialite.data.ContactDao
 import com.google.android.samples.socialite.data.DatabaseManager
+import com.google.android.samples.socialite.data.GenerativeAI
 import com.google.android.samples.socialite.data.MessageDao
 import com.google.android.samples.socialite.data.RoomDatabaseManager
 import com.google.android.samples.socialite.data.populateInitialData
@@ -69,6 +70,9 @@ object DatabaseModule {
 
     @Provides
     fun providesWidgetModelDao(database: AppDatabase): WidgetModelDao = database.widgetDao()
+
+    @Provides
+    fun providesGenerativeAI(): GenerativeAI = GenerativeAI()
 
     @Provides
     @Singleton
