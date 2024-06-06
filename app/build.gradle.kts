@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 /*
  * Copyright (C) 2023 The Android Open Source Project
  *
@@ -27,6 +30,12 @@ kotlin {
     jvmToolchain(17)
 }
 
+fun getSecretKeys(): Properties {
+    val keyFile = file("data.properties")
+    val secretKeys = Properties()
+    secretKeys.load(FileInputStream(keyFile))
+    return secretKeys
+}
 android {
     namespace = "com.google.android.samples.socialite"
     compileSdk = 34
@@ -39,6 +48,7 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        buildConfigField("String", "GEMINI_KEY", getSecretKeys()["GEMINI_KEY"] as String)
     }
 
     buildTypes {
@@ -144,4 +154,5 @@ dependencies {
 
     implementation(libs.coil)
     implementation(libs.coil.compose)
+    implementation(libs.generativeai)
 }

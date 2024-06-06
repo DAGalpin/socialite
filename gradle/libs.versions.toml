@@ -28,6 +28,7 @@ concurrent = "1.1.0"
 core = "1.12.0"
 core-splashscreen = "1.0.1"
 espresso = "3.5.1"
+generativeai = "0.7.0"
 graphics = "1.0.0-alpha05"
 hilt = "2.49"
 hiltNavigationCompose = "1.2.0"
@@ -79,6 +80,7 @@ concurrent-kts = { group = "androidx.concurrent", name = "concurrent-futures-ktx
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "test" }
+generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 glance-material = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
 graphics-shapes = { group = "androidx.graphics", name = "graphics-shapes", version.ref = "graphics" }
