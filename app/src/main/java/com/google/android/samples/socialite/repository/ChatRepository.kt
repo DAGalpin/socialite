@@ -18,6 +18,7 @@ package com.google.android.samples.socialite.repository
 
 import com.google.android.samples.socialite.data.ChatDao
 import com.google.android.samples.socialite.data.ContactDao
+import com.google.android.samples.socialite.data.GenerativeAI
 import com.google.android.samples.socialite.data.MessageDao
 import com.google.android.samples.socialite.di.AppCoroutineScope
 import com.google.android.samples.socialite.model.ChatDetail
@@ -38,6 +39,7 @@ class ChatRepository @Inject internal constructor(
     private val contactDao: ContactDao,
     private val notificationHelper: NotificationHelper,
     private val widgetModelRepository: WidgetModelRepository,
+    private val generativeAI: GenerativeAI,
     @AppCoroutineScope
     private val coroutineScope: CoroutineScope,
 ) {
@@ -102,6 +104,18 @@ class ChatRepository @Inject internal constructor(
         }
     }
 
+    suspend fun sendAIHello(
+        chatId: Long
+    ) : String? {
+        val detail = chatDao.loadDetailById(chatId) ?: return null
+        // only works for single sender chats --- gets the name of the contact
+        val text = generativeAI.getHelloAnimalResponse(detail.firstContact.name)
+        text?.let {
+            sendMessage(chatId, text, null, null)
+        }
+        return text
+    
+    }
     suspend fun clearMessages() {
         messageDao.clearAll()
     }

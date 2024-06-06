@@ -18,24 +18,37 @@ package com.google.android.samples.socialite.widget
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.core.net.toUri
 import androidx.glance.GlanceId
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
+import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
 import androidx.glance.layout.Box
+import com.google.android.samples.socialite.BuildConfig
 import com.google.android.samples.socialite.MainActivity
+import com.google.android.samples.socialite.repository.ChatRepository
 import com.google.android.samples.socialite.widget.model.WidgetModel
 import com.google.android.samples.socialite.widget.model.WidgetModelRepository
 import com.google.android.samples.socialite.widget.model.WidgetState.Empty
 import com.google.android.samples.socialite.widget.model.WidgetState.Loading
 import com.google.android.samples.socialite.widget.ui.FavoriteContact
 import com.google.android.samples.socialite.widget.ui.ZeroState
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+private val contactKey = ActionParameters.Key<Long>("contactId")
 
 class SociaLiteAppWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -67,4 +80,33 @@ class SociaLiteAppWidget : GlanceAppWidget() {
             )
         }
     }
+
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface ChatEntryPoint {
+        fun getChatRepository(): ChatRepository
+    }
+    class SendAIMessage : ActionCallback {
+        override suspend fun onAction(
+            context: Context,
+            glanceId: GlanceId,
+            parameters: ActionParameters
+        ) {
+            val contactId = parameters[contactKey] ?: return
+            val hiltEntryPoint = EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                ChatEntryPoint::class.java
+            )
+            val chatRepository = hiltEntryPoint.getChatRepository()
+//            if (BuildConfig.DEBUG) {
+//                text?.let {
+//                    // only use this for debugging...
+//                    withContext(Dispatchers.Main) {
+//                        Toast.makeText(context, "Sent: ${it}", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//            }
+        }
+    }
 }
+
