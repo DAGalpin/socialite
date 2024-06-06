@@ -80,32 +80,33 @@ class SociaLiteAppWidget : GlanceAppWidget() {
             )
         }
     }
+}
 
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface ChatEntryPoint {
-        fun getChatRepository(): ChatRepository
-    }
-    class SendAIMessage : ActionCallback {
-        override suspend fun onAction(
-            context: Context,
-            glanceId: GlanceId,
-            parameters: ActionParameters
-        ) {
-            val hiltEntryPoint = EntryPointAccessors.fromApplication(
-                context.applicationContext,
-                ChatEntryPoint::class.java
-            )
-            val chatRepository = hiltEntryPoint.getChatRepository()
-//            if (BuildConfig.DEBUG) {
-//                text?.let {
-//                    // only use this for debugging...
-//                    withContext(Dispatchers.Main) {
-//                        Toast.makeText(context, "Sent: ${it}", Toast.LENGTH_SHORT).show()
-//                    }
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface ChatEntryPoint {
+    fun getChatRepository(): ChatRepository
+}
+class SendAIMessage : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
+        val hiltEntryPoint = EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            ChatEntryPoint::class.java
+        )
+        val chatRepository = hiltEntryPoint.getChatRepository()
+//        if (BuildConfig.DEBUG) {
+//            text?.let {
+//                // only use this for debugging...
+//                withContext(Dispatchers.Main) {
+//                    Toast.makeText(context, "Sent: ${it}", Toast.LENGTH_SHORT).show()
 //                }
 //            }
-        }
+//        }
     }
 }
 
