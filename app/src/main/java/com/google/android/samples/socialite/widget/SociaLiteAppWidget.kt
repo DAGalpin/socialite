@@ -26,9 +26,11 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.ActionParameters
+import androidx.glance.action.mutableActionParametersOf
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
 import androidx.glance.layout.Box
@@ -69,42 +71,49 @@ class SociaLiteAppWidget : GlanceAppWidget() {
         when (model) {
             is Empty -> ZeroState(widgetId = widgetId)
             is Loading -> Box {}
-            is WidgetModel -> FavoriteContact(
-                model = model,
-                onClick = actionStartActivity(
-                    Intent(context.applicationContext, MainActivity::class.java)
-                        .setAction(Intent.ACTION_VIEW)
-                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .setData("https://socialite.google.com/chat/${model.contactId}".toUri()),
-                ),
-            )
+            is WidgetModel -> {
+                val params = mutableActionParametersOf()
+                params[contactKey] = model.contactId
+                FavoriteContact(
+                    model = model,
+                    onClick = actionStartActivity(
+                        Intent(context.applicationContext, MainActivity::class.java)
+                            .setAction(Intent.ACTION_VIEW)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .setData("https://socialite.google.com/chat/${model.contactId}".toUri()),
+                    ),
+                    onSendAIMessage = actionRunCallback(SendAIMessage::class.java, params)
+                )
+            }
         }
     }
+}
 
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface ChatEntryPoint {
-        fun getChatRepository(): ChatRepository
-    }
-    class SendAIMessage : ActionCallback {
-        override suspend fun onAction(
-            context: Context,
-            glanceId: GlanceId,
-            parameters: ActionParameters
-        ) {
-            val hiltEntryPoint = EntryPointAccessors.fromApplication(
-                context.applicationContext,
-                ChatEntryPoint::class.java
-            )
-            val chatRepository = hiltEntryPoint.getChatRepository()
-//            if (BuildConfig.DEBUG) {
-//                text?.let {
-//                    // only use this for debugging...
-//                    withContext(Dispatchers.Main) {
-//                        Toast.makeText(context, "Sent: ${it}", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            }
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface ChatEntryPoint {
+    fun getChatRepository(): ChatRepository
+}
+class SendAIMessage : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
+        val contactId = parameters[contactKey] ?: return
+        val hiltEntryPoint = EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            ChatEntryPoint::class.java
+        )
+        val chatRepository = hiltEntryPoint.getChatRepository()
+        val text = chatRepository.sendAIHello(contactId)
+        if (BuildConfig.DEBUG) {
+            text?.let {
+                // only use this for debugging...
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Sent: ${it}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 }
