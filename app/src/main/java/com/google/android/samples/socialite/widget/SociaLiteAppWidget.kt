@@ -92,7 +92,6 @@ class SociaLiteAppWidget : GlanceAppWidget() {
             glanceId: GlanceId,
             parameters: ActionParameters
         ) {
-            val contactId = parameters[contactKey] ?: return
             val hiltEntryPoint = EntryPointAccessors.fromApplication(
                 context.applicationContext,
                 ChatEntryPoint::class.java
