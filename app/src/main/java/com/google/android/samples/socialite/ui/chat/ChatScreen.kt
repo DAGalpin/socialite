@@ -16,6 +16,7 @@
 
 package com.google.android.samples.socialite.ui.chat
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -519,9 +520,10 @@ private fun PreviewInputBar() {
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Preview
 @Composable
+@SuppressLint("UnusedContentLambdaTargetStateParameter")
 private fun PreviewChatContent() {
     SharedTransitionScope {
-        AnimatedContent(targetState = 1) {_ ->
+        AnimatedContent(targetState = 1) { _ ->
             SocialTheme {
                 ChatContent(
                     chat = ChatDetail(ChatWithLastMessage(0L), listOf(Contact.CONTACTS[0])),
