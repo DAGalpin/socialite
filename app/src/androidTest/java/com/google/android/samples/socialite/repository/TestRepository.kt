@@ -17,6 +17,7 @@
 package com.google.android.samples.socialite.repository
 
 import androidx.test.platform.app.InstrumentationRegistry
+import com.google.android.samples.socialite.data.GenerativeAI
 import com.google.android.samples.socialite.data.createTestDatabase
 import com.google.android.samples.socialite.widget.model.WidgetModelRepository
 import kotlinx.coroutines.CoroutineScope
@@ -33,5 +34,6 @@ fun createTestRepository(): ChatRepository {
         notificationHelper = NotificationHelper(context),
         widgetModelRepository = WidgetModelRepository(database.widgetDao(), CoroutineScope(SupervisorJob() + Dispatchers.Default), context),
         coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        generativeAI = GenerativeAI()
     )
 }
