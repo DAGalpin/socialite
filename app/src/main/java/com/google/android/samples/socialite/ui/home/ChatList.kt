@@ -48,9 +48,7 @@ internal fun ChatList(
     chats: List<ChatDetail>,
     contentPadding: PaddingValues,
     onChatClicked: (chatId: Long) -> Unit,
-    modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope
+    modifier: Modifier = Modifier
 ) {
     @SuppressLint("InlinedApi") // Granted at install time on API <33.
     val notificationPermissionState = rememberPermissionState(
@@ -77,8 +75,6 @@ internal fun ChatList(
             ChatRow(
                 chat = chat,
                 onClick = { onChatClicked(chat.chatWithLastMessage.id) },
-                sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = animatedContentScope,
             )
         }
     }

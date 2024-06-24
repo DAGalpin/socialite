@@ -16,14 +16,11 @@
 
 package com.google.android.samples.socialite.ui
 
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,9 +47,8 @@ fun ChatRow(
     chat: ChatDetail,
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
 ) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
     with(sharedTransitionScope) {
         Row(
             modifier = modifier
@@ -69,11 +65,20 @@ fun ChatRow(
             Image(
                 painter = rememberIconPainter(contentUri = contact.iconUri),
                 contentDescription = null,
-                modifier = Modifier.Companion
-                    .sharedElement(
-                        sharedTransitionScope.rememberSharedContentState(key = chat.chatWithLastMessage.id),
-                        animatedVisibilityScope = animatedContentScope
-                    )
+                modifier = Modifier
+                    .block {
+                        val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+                        if(this@with != null && animatedVisibilityScope != null)
+                            sharedElement(
+                                this@with.rememberSharedContentState(
+                                    key = ChatSharedElementKey(
+                                        chatId = chat.chatWithLastMessage.id,
+                                        type = ChatSharedElementType.Image)
+                                ),
+                                animatedVisibilityScope = animatedVisibilityScope
+                                    ?: throw IllegalStateException("No AnimatedVisibilityScope found")
+                            ) else Modifier
+                    }
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(Color.LightGray),
@@ -108,5 +113,6 @@ fun ChatRow(
                 )
             }
 
-        }}
+        }
+    }
 }

@@ -20,10 +20,7 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.util.Log
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -94,6 +91,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -104,8 +102,14 @@ import com.google.android.samples.socialite.R
 import com.google.android.samples.socialite.data.ChatWithLastMessage
 import com.google.android.samples.socialite.model.ChatDetail
 import com.google.android.samples.socialite.model.Contact
+import com.google.android.samples.socialite.ui.ChatSharedElementKey
+import com.google.android.samples.socialite.ui.ChatSharedElementType
+import com.google.android.samples.socialite.ui.LocalNavAnimatedVisibilityScope
+import com.google.android.samples.socialite.ui.LocalSharedTransitionScope
 import com.google.android.samples.socialite.ui.SocialTheme
+import com.google.android.samples.socialite.ui.block
 import com.google.android.samples.socialite.ui.rememberIconPainter
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -122,9 +126,7 @@ fun ChatScreen(
     onPhotoPickerClick: () -> Unit,
     onVideoClick: (uri: String) -> Unit,
     prefilledText: String? = null,
-    viewModel: ChatViewModel = hiltViewModel(),
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope
+    viewModel: ChatViewModel = hiltViewModel()
 ) {
     LaunchedEffect(chatId) {
         viewModel.setChatId(chatId)
@@ -150,7 +152,6 @@ fun ChatScreen(
             onVideoClick = onVideoClick,
             modifier = modifier
                 .clip(RoundedCornerShape(5)),
-            sharedTransitionScope = sharedTransitionScope, animatedContentScope = animatedContentScope
         )
     }
     LifecycleEffect(
@@ -195,9 +196,7 @@ private fun ChatContent(
     onCameraClick: () -> Unit,
     onPhotoPickerClick: () -> Unit,
     onVideoClick: (uri: String) -> Unit,
-    modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope
+    modifier: Modifier = Modifier
 ) {
     val topAppBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
@@ -209,8 +208,6 @@ private fun ChatContent(
                 chat = chat,
                 scrollBehavior = scrollBehavior,
                 onBackPressed = onBackPressed,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = animatedContentScope,
             )
         },
     ) { innerPadding ->
@@ -260,9 +257,8 @@ private fun ChatAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     onBackPressed: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
     ) {
+    val sharedTransitionScope = LocalSharedTransitionScope.current
     with(sharedTransitionScope) {
         TopAppBar(
             title = {
@@ -275,11 +271,20 @@ private fun ChatAppBar(
                     Image(
                         painter = rememberIconPainter(contact.iconUri),
                         contentDescription = null,
-                        modifier = Modifier.Companion
-                            .sharedElement(
-                                sharedTransitionScope.rememberSharedContentState(key = chat.chatWithLastMessage.id),
-                                animatedVisibilityScope = animatedContentScope,
-                                )
+                        modifier = Modifier
+                            .block {
+                                val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+                                if(this@with != null && animatedVisibilityScope != null)
+                                    sharedElement(
+                                        this@with.rememberSharedContentState(
+                                            key = ChatSharedElementKey(
+                                                chatId = chat.chatWithLastMessage.id,
+                                                type = ChatSharedElementType.Image)
+                                        ),
+                                        animatedVisibilityScope = animatedVisibilityScope
+                                            ?: throw IllegalStateException("No AnimatedVisibilityScope found")
+                                    ) else Modifier
+                            }
                             .size(32.dp)
                             .clip(CircleShape)
                             .background(Color.LightGray),
@@ -532,30 +537,24 @@ private fun PreviewInputBar() {
 @Preview
 @Composable
 private fun PreviewChatContent() {
-    SharedTransitionScope {
-        AnimatedContent(targetState = 1) {_ ->
-            SocialTheme {
-                ChatContent(
-                    chat = ChatDetail(ChatWithLastMessage(0L), listOf(Contact.CONTACTS[0])),
-                    messages = listOf(
-                        ChatMessage("Hi!", null, null, 0L, false, null),
-                        ChatMessage("Hello", null, null, 0L, true, null),
-                        ChatMessage("world", null, null, 0L, true, null),
-                        ChatMessage("!", null, null, 0L, true, null),
-                        ChatMessage("Hello, world!", null, null, 0L, true, null),
-                    ),
-                    input = "Hello",
-                    sendEnabled = true,
-                    onBackPressed = {},
-                    onInputChanged = {},
-                    onSendClick = {},
-                    onCameraClick = {},
-                    onPhotoPickerClick = {},
-                    onVideoClick = {},
-                    sharedTransitionScope = this@SharedTransitionScope,
-                    animatedContentScope = this@AnimatedContent
-                )
-            }
-        }
+    SocialTheme {
+        ChatContent(
+            chat = ChatDetail(ChatWithLastMessage(0L), listOf(Contact.CONTACTS[0])),
+            messages = listOf(
+                ChatMessage("Hi!", null, null, 0L, false, null),
+                ChatMessage("Hello", null, null, 0L, true, null),
+                ChatMessage("world", null, null, 0L, true, null),
+                ChatMessage("!", null, null, 0L, true, null),
+                ChatMessage("Hello, world!", null, null, 0L, true, "file:///android_asset/cat.jpg".toUri()),
+            ),
+            input = "Hello",
+            sendEnabled = true,
+            onBackPressed = {},
+            onInputChanged = {},
+            onSendClick = {},
+            onCameraClick = {},
+            onPhotoPickerClick = {},
+            onVideoClick = {},
+        )
     }
 }
