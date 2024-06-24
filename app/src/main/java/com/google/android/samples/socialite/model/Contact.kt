@@ -20,6 +20,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.File
 
 private val replyModels = mapOf<String, Contact.(String) -> Message.Builder>(
     "cat" to { _ -> buildReply { this.text = "Meow" } },
