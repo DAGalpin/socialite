@@ -76,7 +76,6 @@ fun ChatRow(
                                         type = ChatSharedElementType.Image)
                                 ),
                                 animatedVisibilityScope = animatedVisibilityScope
-                                    ?: throw IllegalStateException("No AnimatedVisibilityScope found")
                             ) else Modifier
                     }
                     .size(48.dp)

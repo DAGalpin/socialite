@@ -282,7 +282,6 @@ private fun ChatAppBar(
                                                 type = ChatSharedElementType.Image)
                                         ),
                                         animatedVisibilityScope = animatedVisibilityScope
-                                            ?: throw IllegalStateException("No AnimatedVisibilityScope found")
                                     ) else Modifier
                             }
                             .size(32.dp)
