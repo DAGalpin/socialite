@@ -27,26 +27,18 @@ import com.google.android.samples.socialite.ui.chat.ChatScreen
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun Bubble(chatId: Long) {
-    SharedTransitionLayout {
-        AnimatedContent(targetState = 1) { _ ->
-            SocialTheme {
-                ChatScreen(
-                    chatId = chatId,
-                    foreground = false,
-                    onBackPressed = null,
-                    // TODO (donovanfm): Hook up camera button in the Bubble composable
-                    onCameraClick = {},
-                    // TODO (jolandaverhoef): Hook up play video button in the Bubble composable
-                    onVideoClick = {},
-                    // TODO (mayurikhin): Hook up camera button in the Bubble composable
-                    onPhotoPickerClick = {},
-                    modifier = Modifier.fillMaxSize(),
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedContentScope = this@AnimatedContent,
-                    // sharedTransitionScope = this@SharedTransitionLayout,
-                    // animatedContentScope = this@AnimatedContent
-                )
-            }
-        }
+    SocialTheme {
+        ChatScreen(
+            chatId = chatId,
+            foreground = false,
+            onBackPressed = null,
+            // TODO (donovanfm): Hook up camera button in the Bubble composable
+            onCameraClick = {},
+            // TODO (jolandaverhoef): Hook up play video button in the Bubble composable
+            onVideoClick = {},
+            // TODO (mayurikhin): Hook up camera button in the Bubble composable
+            onPhotoPickerClick = {},
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }

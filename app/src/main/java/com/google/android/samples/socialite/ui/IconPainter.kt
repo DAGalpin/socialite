@@ -28,7 +28,7 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
  */
 @Composable
 fun rememberIconPainter(contentUri: Uri): Painter {
-    val icon = IconCompat.createWithAdaptiveBitmapContentUri(contentUri)
+    val icon = IconCompat.createWithContentUri(contentUri)
     val context = LocalContext.current
     return rememberDrawablePainter(drawable = icon.loadDrawable(context))
 }
