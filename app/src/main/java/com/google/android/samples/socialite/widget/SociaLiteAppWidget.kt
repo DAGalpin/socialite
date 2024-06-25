@@ -26,9 +26,11 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.ActionParameters
+import androidx.glance.action.mutableActionParametersOf
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
 import androidx.glance.layout.Box
@@ -69,15 +71,17 @@ class SociaLiteAppWidget : GlanceAppWidget() {
         when (model) {
             is Empty -> ZeroState(widgetId = widgetId)
             is Loading -> Box {}
-            is WidgetModel -> FavoriteContact(
-                model = model,
-                onClick = actionStartActivity(
-                    Intent(context.applicationContext, MainActivity::class.java)
-                        .setAction(Intent.ACTION_VIEW)
-                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .setData("https://socialite.google.com/chat/${model.contactId}".toUri()),
-                ),
-            )
+            is WidgetModel -> {
+                FavoriteContact(
+                    model = model,
+                    onClick = actionStartActivity(
+                        Intent(context.applicationContext, MainActivity::class.java)
+                            .setAction(Intent.ACTION_VIEW)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .setData("https://socialite.google.com/chat/${model.contactId}".toUri()),
+                    ),
+                )
+            }
         }
     }
 }

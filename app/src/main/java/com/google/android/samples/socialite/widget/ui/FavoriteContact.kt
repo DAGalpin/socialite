@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.glance.Button
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
@@ -39,10 +40,15 @@ import androidx.glance.layout.wrapContentHeight
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.google.android.samples.socialite.widget.SendAIMessage
 import com.google.android.samples.socialite.widget.model.WidgetModel
 
 @Composable
-fun FavoriteContact(modifier: GlanceModifier = GlanceModifier, model: WidgetModel, onClick: Action) {
+fun FavoriteContact(
+    modifier: GlanceModifier = GlanceModifier,
+    model: WidgetModel,
+    onClick: Action,
+    ) {
     Column(
         modifier = modifier.fillMaxSize().clickable(onClick)
             .background(GlanceTheme.colors.widgetBackground).appWidgetBackground()
